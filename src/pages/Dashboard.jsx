@@ -9,17 +9,22 @@ const GENRES_LIST = [
   'Musical', 'Sport', 'War', 'Western', 'Biography'
 ];
 
+import { useState, useEffect } from 'react';
+import { supabase } from '../services/supabase';
+import MovieCard from '../components/movie/MovieCard';
+
+// Tumhara GENRES_LIST aur baaki imports waise hi rahenge...
+
 export default function Dashboard({ currentUser }) {
   const [movies, setMovies] = useState([]);
   const [watchStatuses, setWatchStatuses] = useState([]);
+  const [wishlists, setWishlists] = useState([]); // ✅ Naya state add kiya
   const [loading, setLoading] = useState(true);
   
   const [isAdding, setIsAdding] = useState(false);
   const [newMovie, setNewMovie] = useState({ name: '', genres: [] });
-  
-  // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState('All'); // 'All', 'Watched', 'Unwatched'
+  const [filter, setFilter] = useState('All');
 
   useEffect(() => {
     fetchData();
@@ -27,19 +32,20 @@ export default function Dashboard({ currentUser }) {
 
   const fetchData = async () => {
     setLoading(true);
-    const { data: moviesData } = await supabase
-      .from('movies')
-      .select('*')
-      .order('created_at', { ascending: false });
-      
-    const { data: statusData } = await supabase
-      .from('watch_status')
-      .select('*');
+    
+    // ✅ Teeno data ek sath mangwa rahe hain (Sirf 3 API calls instead of 50+)
+    const { data: moviesData } = await supabase.from('movies').select('*').order('created_at', { ascending: false });
+    const { data: statusData } = await supabase.from('watch_status').select('*');
+    const { data: wishlistData } = await supabase.from('wishlist').select('*');
 
     if (moviesData) setMovies(moviesData);
     if (statusData) setWatchStatuses(statusData);
+    if (wishlistData) setWishlists(wishlistData);
+    
     setLoading(false);
   };
+
+  // ... (Tumhara handleAddMovie aur toggleGenre function waise ka waisa hi rahega)
 
   const handleAddMovie = async (e) => {
     e.preventDefault();
@@ -185,9 +191,9 @@ export default function Dashboard({ currentUser }) {
         </div>
       </div>
 
-      {/* Movie Grid */}
+      {/* Movie Grid inside Dashboard */}
       {filteredMovies.length === 0 ? (
-        <div className="text-center py-20 font-bold uppercase tracking-wide border-3 border-brutal-black bg-brutal-white">
+        <div className="text-center py-20 text-neutral-500 border border-neutral-800 rounded-xl bg-neutral-900/30">
           No movies found matching your criteria.
         </div>
       ) : (
@@ -198,6 +204,7 @@ export default function Dashboard({ currentUser }) {
               movie={movie} 
               currentUser={currentUser}
               allStatuses={watchStatuses.filter(ws => ws.movie_id === movie.id)}
+              isWishlisted={wishlists.some(w => w.movie_id === movie.id && w.user_id === currentUser)} // ✅ Ye line add ki
               onStatusChange={fetchData}
             />
           ))}
