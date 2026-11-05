@@ -299,11 +299,13 @@ export default function Dashboard({ currentUser }) {
                         {!isFiltering && (
                           <div
                             {...provided.dragHandleProps}
-                            className="absolute -left-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing p-1.5 bg-brutal-white border-2 border-brutal-black hover:bg-brutal-red z-10 hidden md:block"
+                            className="absolute -left-1 md:-left-3 top-1/2 -translate-y-1/2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing p-1.5 bg-brutal-white border-2 border-brutal-black hover:bg-brutal-red z-10"
                             title="Drag to reorder"
                           >
                             ✋
                           </div>
+
+                          
                         )}
 
                         <MovieCard
